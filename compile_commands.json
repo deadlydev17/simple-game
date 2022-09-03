@@ -1,0 +1,20 @@
+[
+  {
+    "directory": "/data/data/com.termux/files/home/cpp-tutorial",
+    "file": "main.cpp",
+    "output": "a.o",
+    "arguments": [
+      "/data/data/com.termux/files/usr/bin/clang-14",
+      "-xc++",
+      "--sysroot=/data/data/com.termux/files",
+      "main.cpp",
+      "--driver-mode=g++",
+      "-Wall",
+      "-std=c++2a",
+      "-o",
+      "a.o",
+      "-c",
+      "--target=aarch64-unknown-linux-android24"
+    ]
+  }
+]
