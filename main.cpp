@@ -13,6 +13,7 @@ public:
 
 private:
   array_type m_deck{};
+  index_type m_indexCard{};
 
 public:
   Deck() {
@@ -37,15 +38,46 @@ public:
   void shuffle() {
     std::mt19937 mt{static_cast<std::mt19937::result_type>(std::time(nullptr))};
     std::shuffle(m_deck.begin(), m_deck.end(), mt);
+    m_indexCard = 0;
+  }
+
+  const Card& dealCard() { return m_deck[m_indexCard++]; }
+};
+
+class Player {
+private:
+  int m_score{};
+
+public:
+  int drawCard(Deck& card) {
+    int value = card.dealCard().value();
+    return m_score += value;
+  }
+
+
+  int score() const  {
+    return m_score;
+  }
+
+  bool isBust() const  {
+    return (m_score > Config::g_maximumScore);
   }
 };
 
 int main() {
 
   Deck deck{};
-  deck.print();
+
   deck.shuffle();
   deck.print();
 
+  Player player{};
+  Player dealer{};
+
+  int playerCard { player.drawCard(deck) };
+  std::cout << "The player drew a card with value " << playerCard << " and now has score " << player.score() << '\n';
+
+  int dealerCard { dealer.drawCard(deck) };
+  std::cout << "The dealer drew a card with value " << dealerCard << " and now has score " << dealer.score() << '\n';
   return 0;
 }
