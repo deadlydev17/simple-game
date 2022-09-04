@@ -4,7 +4,12 @@
 #include <array>
 #include <cassert>
 #include <iostream>
+#include <limits>
 #include <random>
+
+void ignoreLine() {
+  std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+}
 
 class Deck {
 public:
@@ -51,9 +56,9 @@ private:
 public:
   int drawCard(Deck& card) {
     int value = card.dealCard().value();
-    return m_score += value;
+    m_score += value;
+    return value;
   }
-
 
   int score() const  {
     return m_score;
@@ -64,20 +69,78 @@ public:
   }
 };
 
+bool playerWantsToHit() {
+  while (true) {
+    std::cout << "(h) to hit or (s) to stand: ";
+    char ch{};
+    std::cin >> ch;
+    switch (ch) {
+      case 'h': return true;
+      case 's': return false;
+      default: ignoreLine();
+    }
+  }
+}
+
+bool playerTurn(Deck& deck, Player& player) {
+  while (true) {
+    if (player.isBust()) {
+      return true;
+    }else {
+      if (playerWantsToHit()) {
+        auto value = player.drawCard(deck);
+        std::cout << "You were dealt a " << value << " and you have " << player.score() << '\n';
+      }else {
+        return false;
+      }
+    }
+  }
+}
+
+bool dealerTurn(Deck& deck, Player dealer) {
+  while (dealer.score() < Config::g_minimumDealerScore) {
+    auto value = dealer.drawCard(deck);
+    std::cout << "Dealer turned up a " << value << " and now have " << dealer.score() << '\n';
+  }
+
+  if (dealer.isBust()) {
+    return true;
+  }
+  return false;
+}
+
+bool playerBlackjack(Deck& deck) {
+  Player dealer{};
+  dealer.drawCard(deck);
+  std::cout << "The dealer is showing " << dealer.score() << '\n';
+
+  Player player{};
+  player.drawCard(deck);
+  player.drawCard(deck);
+
+  std::cout << "you have " << player.score() << '\n';
+
+  if (playerTurn(deck, player)) {
+    return false;
+  }
+
+  if (dealerTurn(deck, dealer)) {
+    return true;
+  }
+  return (player.score() > dealer.score());
+}
+
 int main() {
 
   Deck deck{};
-
   deck.shuffle();
-  deck.print();
 
-  Player player{};
-  Player dealer{};
+  if (playerBlackjack(deck))
+  {
+    std::cout << "you win \n";
+  }else {
+    std::cout << "you lose \n";
+  }
 
-  int playerCard { player.drawCard(deck) };
-  std::cout << "The player drew a card with value " << playerCard << " and now has score " << player.score() << '\n';
-
-  int dealerCard { dealer.drawCard(deck) };
-  std::cout << "The dealer drew a card with value " << dealerCard << " and now has score " << dealer.score() << '\n';
   return 0;
 }
